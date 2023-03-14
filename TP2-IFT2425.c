@@ -48,7 +48,7 @@ int open_display()
 
 /************************************************************************/
 /* FABRIQUE_WINDOW()							*/
-/* Cette fonction crée une fenetre X et l'affiche à l'écran.	        */
+/* Cette fonction crï¿½e une fenetre X et l'affiche ï¿½ l'ï¿½cran.	        */
 /************************************************************************/
 Window fabrique_window(char *nom_fen,int x,int y,int width,int height,int zoom)
 {
@@ -92,7 +92,7 @@ Window fabrique_window(char *nom_fen,int x,int y,int width,int height,int zoom)
 
 /****************************************************************************/
 /* CREE_XIMAGE()							    */
-/* Crée une XImage à partir d'un tableau de float  (zoom possible)          */
+/* Crï¿½e une XImage ï¿½ partir d'un tableau de float  (zoom possible)          */
 /****************************************************************************/
 XImage* cree_Ximage(float** mat,int z,int length,int width)
 {
@@ -160,7 +160,7 @@ XImage* cree_Ximage(float** mat,int z,int length,int width)
 
 /****************************************************************************/
 /* CREE_XIMAGECOUL()							    */
-/* Crée une XImage à partir d'un tableau 3d de float  (zoom possible)       */
+/* Crï¿½e une XImage ï¿½ partir d'un tableau 3d de float  (zoom possible)       */
 /****************************************************************************/
 XImage* cree_XimageCoul(float*** matRVB,int z,int length,int width)
 {
@@ -238,7 +238,7 @@ XImage* cree_XimageCoul(float*** matRVB,int z,int length,int width)
 
 /****************************************************************************/
 /* CREE_XIMAGEWITHMVT()							    */
-/* Crée une XImage à partir d'une Image N&B et incruste son vecteur de Mvt  */
+/* Crï¿½e une XImage ï¿½ partir d'une Image N&B et incruste son vecteur de Mvt  */
 /****************************************************************************/
 XImage* cree_XimageWithMvt(float** matImg,float** vctMvt,int z,int length,int width)
 {
@@ -585,7 +585,29 @@ void ConvertVelocityFieldInAroowField(float*** SeqImgOptFlot,float*** Vx,float**
 //-------------------------//
 //--- Vos Fonctions Ici ---//
 //-------------------------//
+void STDerivativex(float** image1, float** image2, int length, int width, float** der1){
+  for(int i=0;i<length-1;i++){
+    for(int j=0;j<width;j++){
+      der1[i][j]=(image1[i][j+1]+image1[i+1][j+1]-image1[i][j]-image1[i+1][j]+image2[i][j+1]+image2[i+1][j+1]-image2[i][j]-image2[i+1][j])/4;
+    }
+  }
+}
 
+void STDerivativey(float** image1, float** image2, int length, int width, float** der1){
+  for(int i=0;i<length-1;i++){
+    for(int j=0;j<width;j++){
+      der1[i][j]=(image1[i+1][j]+image1[i+1][j+1]-image1[i][j]-image1[i][j+1]+image2[i+1][j]+image2[i+1][j+1]-image2[i][j]-image2[i][j+1])/4;
+    }
+  }
+}
+
+void STDerivativet(float** image1, float** image2, int length, int width, float** der1){
+  for(int i=0;i<length-1;i++){
+    for(int j=0;j<width;j++){
+      der1[i][j]=(image2[i][j]+image2[i+1][j]-image1[i][j]-image1[i+1][j]+image2[i][j+1]+image2[i+1][j+1]-image1[i][j]-image1[i][j+1])/4;
+    }
+  }
+}
 
 
 //----------------------------------------------------------
@@ -668,19 +690,22 @@ int main(int argc,char** argv)
  //------------------------------------------------------------
  // Estimation du Flux Optique de Horn & Schunk [par Jacobi]
  //
- // L'image 1 et 2 sont enregistrée dans les tableau 2D Img1[][] et Img2[][]
- // Ix, Iy, It sont des tableaux 2D de même dimension que l'image qui ont été allouées
- // VxM, VyM  Vecteur Vx & Vy moyenné aussi
+ // L'image 1 et 2 sont enregistrï¿½e dans les tableau 2D Img1[][] et Img2[][]
+ // Ix, Iy, It sont des tableaux 2D de mï¿½me dimension que l'image qui ont ï¿½tï¿½ allouï¿½es
+ // VxM, VyM  Vecteur Vx & Vy moyennï¿½ aussi
  // OptFl_Vx, OptFl_Vy qui contiendra le flot optique 
  //
  //-----------------------------------------------------------
+ printf("\n%i",length);
  printf("\n\n Jacobi Iterations :\n");
  
  //Programmer ici ........
 
+ 
 
-
-
+ STDerivativex(Img1,Img2,length,width,Ix);
+ STDerivativey(Img1,Img2,length,width,Iy);
+ STDerivativet(Img1,Img2,length,width,It);
 
 
 
