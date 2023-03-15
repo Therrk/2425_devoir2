@@ -609,6 +609,41 @@ void STDerivativet(float** image1, float** image2, int length, int width, float*
   }
 }
 
+void firstItx(float** Ix, float** Iy, float** It, float alpha,int length, int width,float** flotOpt){
+  for(int i=0;i<length;i++){
+    for(int j=0;j<width;j++){
+      flotOpt[i][j]=0-Ix[i][j]*(Ix[i][j]*0+Iy[i][j]*0+It[i][j])/(powf(alpha,2)+powf(Ix[i][j],2)+powf(Iy[i][j],2));
+    }
+  }
+  
+}
+void firstIty(float** Ix, float** Iy, float** It, float alpha,int length, int width,float** flotOpt){
+  for(int i=0;i<length;i++){
+    for(int j=0;j<width;j++){
+      flotOpt[i][j]=0-Iy[i][j]*(Ix[i][j]*0+Iy[i][j]*0+It[i][j])/(powf(alpha,2)+powf(Ix[i][j],2)+powf(Iy[i][j],2));
+    }
+  }
+  
+}
+
+void makemoy(float** vmoyx, float** vmoyy, float** vx, float** vy, int length, int width){
+  for(int i=1;i<length-1;i++){
+    for(int j=1;j<width-1;j++){
+      vmoyx[i][j]=(vx[i][j+1]+vx[i][j-1]+vx[i+1][j]+vx[i-1][j])/6+(vx[i+1][j+1]+vx[i+1][j-1]+vx[i-1][j+1]+vx[i-1][j-1])/12;
+      vmoyy[i][j]=(vy[i][j+1]+vy[i][j-1]+vy[i+1][j]+vy[i-1][j])/6+(vy[i+1][j+1]+vy[i+1][j-1]+vy[i-1][j+1]+vy[i-1][j-1])/12;
+    }
+  }
+}
+
+void nextIts(float** vmoyx, float** vmoyy,int presentIt,float** Ix, float** Iy, float** It, float alpha,int length, int width,float*** vx, float*** vy){
+  for(int i=0;i<length;i++){
+    for(int j=0;j<width;j++){
+      vx[presentIt][i][j]=vmoyx[i][j]-Ix[i][j]*(Ix[i][j]*vmoyx[i][j]+Iy[i][j]*vmoyy[i][j]+It[i][j])/(powf(alpha,2)+powf(Ix[i][j],2)+powf(Iy[i][j],2));
+      vy[presentIt][i][j]=vmoyy[i][j]-Iy[i][j]*(Ix[i][j]*vmoyx[i][j]+Iy[i][j]*vmoyy[i][j]+It[i][j])/(powf(alpha,2)+powf(Ix[i][j],2)+powf(Iy[i][j],2));
+    }
+  }
+}
+
 
 //----------------------------------------------------------
 //----------------------------------------------------------
@@ -696,18 +731,21 @@ int main(int argc,char** argv)
  // OptFl_Vx, OptFl_Vy qui contiendra le flot optique 
  //
  //-----------------------------------------------------------
- printf("\n%i",length);
  printf("\n\n Jacobi Iterations :\n");
  
  //Programmer ici ........
 
  
-
  STDerivativex(Img1,Img2,length,width,Ix);
  STDerivativey(Img1,Img2,length,width,Iy);
  STDerivativet(Img1,Img2,length,width,It);
-
-
+ firstItx(Ix,Iy,It,alpha,length,width,OptFl_Vx[0]);
+ firstIty(Ix,Iy,It,alpha,length,width,OptFl_Vy[0]);
+ makemoy(VxM,VyM,OptFl_Vx[0],OptFl_Vy[0],length,width);
+ for(int i=1;i<NBITER;i++){
+  nextIts(VxM,VyM,i,Ix,Iy,It,alpha,length,width,OptFl_Vx,OptFl_Vy);
+  makemoy(VxM,VyM,OptFl_Vx[i],OptFl_Vy[i],length,width);
+ }
 
 
  //Convert {OptFl_Vx[i][j],OptFl_Vy[i][j]} -> {Array Of Vector}
